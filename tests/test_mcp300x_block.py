@@ -1,5 +1,6 @@
 from collections import defaultdict
-from unittest.mock import patch
+from unittest import skip
+from unittest.mock import MagicMock, patch
 from nio.block.terminals import DEFAULT_TERMINAL
 from nio.signal.base import Signal
 from nio.testing.block_test_case import NIOBlockTestCase
@@ -24,6 +25,22 @@ class TestMCP300xBlock(NIOBlockTestCase):
         blk = MCP300x()
         self.configure_block(blk, {})
         blk._spi.read.return_value = 3.14
+        blk.start()
+        blk.process_signals([Signal()])
+        blk.stop()
+        blk._spi.read.assert_called_once_with(0)
+        self.assert_num_signals_notified(1)
+        self.assertDictEqual(
+            self.last_notified[DEFAULT_TERMINAL][0].to_dict(), {
+                "value": 3.14
+            })
+
+    @skip("Only run on a raspbeery pi")
+    def test_read(self, mock_spi):
+        """Raspberry pi uses spidev library's xfer2 function."""
+        blk = MCP300x()
+        self.configure_block(blk, {})
+        self._spi._spi.xfer2 = MagicMock(return_value=4)
         blk.start()
         blk.process_signals([Signal()])
         blk.stop()

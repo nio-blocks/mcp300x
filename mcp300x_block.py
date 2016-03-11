@@ -1,3 +1,4 @@
+from threading import Lock
 from nio.block.base import Block
 from nio.signal.base import Signal
 from nio.util.discovery import discoverable
@@ -13,13 +14,27 @@ class SPIDevice():
     devices.
 
     """
-    def __init__(self, bus=0, device=0):
+    def __init__(self, logger, bus=0, device=0):
+        import spidev
+        self.logger = logger
         self._bus = bus
         self._device = device
+        self._spi = spidev.SpiDev()
+        self._spi.open(bus, device)
+        self._spi_lock = Lock()
 
     def read(self, channel):
         """Read value at channel"""
-        raise NotImplemented()
+        with self._spi_lock():
+            r = self._spi.xfer2([1, (8 + channel) << 4, 0])
+            self.logger.debug("Read from channel {}: {}".format(channel, r))
+        return ((r[1] & 3) << 8) + r[2]
+
+    def close(self):
+        try:
+            self._spi.close()
+        except:
+            self.logger.warning("Failed to close SPI", exc_info=True)
 
 
 @discoverable
@@ -34,6 +49,10 @@ class MCP300x(Block):
     def configure(self, context):
         super().configure(context)
         self._spi = SPIDevice(0, 0)
+
+    def stop(self):
+        super().stop()
+        self._spi.close()
 
     def process_signals(self, signals):
         output_signals = []
