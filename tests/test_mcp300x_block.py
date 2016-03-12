@@ -17,7 +17,7 @@ class TestMCP300xBlock(NIOBlockTestCase):
         self.assertTrue(blk._spi)
         self.assertTrue(isinstance(blk._spi, SPIDevice))
         # SPIDevice is initialized with default bus and device
-        mock_spi.assert_called_once_with(0, 0)
+        mock_spi.assert_called_once_with(blk.logger, 0, 0)
 
     @patch(SPIDevice.__module__ + ".SPIDevice", spec=SPIDevice)
     def test_read(self, mock_spi):
@@ -35,18 +35,32 @@ class TestMCP300xBlock(NIOBlockTestCase):
                 "value": 3.14
             })
 
+    @patch(SPIDevice.__module__ + ".SPIDevice", spec=SPIDevice)
+    def test_channel_property(self, mock_spi):
+        """Each signal triggers an spi read."""
+        blk = MCP300x()
+        self.configure_block(blk, {
+            "channel": "{{ $channel }}"
+        })
+        blk.start()
+        blk.process_signals([Signal({"channel": 1})])
+        blk.stop()
+        blk._spi.read.assert_called_once_with(1)
+        self.assert_num_signals_notified(1)
+
     @skip("Only run on a raspbeery pi")
-    def test_read(self, mock_spi):
+    def test_raspberry_pi(self):
         """Raspberry pi uses spidev library's xfer2 function."""
         blk = MCP300x()
         self.configure_block(blk, {})
-        self._spi._spi.xfer2 = MagicMock(return_value=4)
+        blk._spi._spi = MagicMock()
+        blk._spi._spi.xfer2.return_value = b'123'
         blk.start()
         blk.process_signals([Signal()])
         blk.stop()
-        blk._spi.read.assert_called_once_with(0)
+        blk._spi._spi.xfer2.assert_called_once_with([1, 128, 0])
         self.assert_num_signals_notified(1)
         self.assertDictEqual(
             self.last_notified[DEFAULT_TERMINAL][0].to_dict(), {
-                "value": 3.14
+                "value": 563
             })

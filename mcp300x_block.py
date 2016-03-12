@@ -2,7 +2,7 @@ from threading import Lock
 from nio.block.base import Block
 from nio.signal.base import Signal
 from nio.util.discovery import discoverable
-from nio.properties import VersionProperty
+from nio.properties import VersionProperty, IntProperty
 
 
 class SPIDevice():
@@ -25,7 +25,7 @@ class SPIDevice():
 
     def read(self, channel):
         """Read value at channel"""
-        with self._spi_lock():
+        with self._spi_lock:
             r = self._spi.xfer2([1, (8 + channel) << 4, 0])
             self.logger.debug("Read from channel {}: {}".format(channel, r))
         return ((r[1] & 3) << 8) + r[2]
@@ -41,6 +41,7 @@ class SPIDevice():
 class MCP300x(Block):
 
     version = VersionProperty('0.1.0')
+    channel = IntProperty(default=0)
 
     def __init__(self):
         super().__init__()
@@ -48,7 +49,7 @@ class MCP300x(Block):
 
     def configure(self, context):
         super().configure(context)
-        self._spi = SPIDevice(0, 0)
+        self._spi = SPIDevice(self.logger, 0, 0)
 
     def stop(self):
         super().stop()
@@ -57,6 +58,7 @@ class MCP300x(Block):
     def process_signals(self, signals):
         output_signals = []
         for signal in signals:
-            value = self._spi.read(0)
+            value = self._spi.read(self.channel(signal))
+            value = value * 5.0 / 1024
             output_signals.append(Signal({"value": value}))
         self.notify_signals(output_signals)
