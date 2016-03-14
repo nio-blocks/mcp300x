@@ -32,7 +32,27 @@ class TestMCP300xBlock(NIOBlockTestCase):
         self.assert_num_signals_notified(1)
         self.assertDictEqual(
             self.last_notified[DEFAULT_TERMINAL][0].to_dict(), {
-                "value": (((2 & 3) << 8) + 3) * 5.0 / 1024
+                "volts": (((2 & 3) << 8) + 3) * 5.0 / 1024
+            })
+
+    @patch(SPIDevice.__module__ + ".SPIDevice", spec=SPIDevice)
+    def test_enrich_signals(self, mock_spi):
+        """Signals are enriched by new value."""
+        blk = MCP300x()
+        blk._read_from_channel = MagicMock(return_value=1.23)
+        self.configure_block(blk, {
+            "enrich": {"exclude_existing": False}
+        })
+        blk.start()
+        blk.process_signals(
+            [Signal({"attr1": "val1", "attr2": "val2", "volts": "old"})])
+        blk.stop()
+        self.assert_num_signals_notified(1)
+        self.assertDictEqual(
+            self.last_notified[DEFAULT_TERMINAL][0].to_dict(), {
+                "attr1": "val1",
+                "attr2": "val2",
+                "volts": 1.23,
             })
 
     @patch(SPIDevice.__module__ + ".SPIDevice", spec=SPIDevice)
@@ -62,4 +82,4 @@ class TestMCP300xBlock(NIOBlockTestCase):
         self.assert_num_signals_notified(1)
         # Value should be voltage between 0 and 5
         self.assertTrue(
-            0 <= self.last_notified[DEFAULT_TERMINAL][0].value <= 5)
+            0 <= self.last_notified[DEFAULT_TERMINAL][0].volts <= 5)

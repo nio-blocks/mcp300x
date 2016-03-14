@@ -21,4 +21,8 @@ Any list of signals.
 
 Output
 ------
-Same list of signals as input.
+Adds "volts" to each signal.
+
+```
+    {"volts": 3.14}
+```

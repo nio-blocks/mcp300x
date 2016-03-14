@@ -1,8 +1,9 @@
 from threading import Lock
 from nio.block.base import Block
+from nio.block.mixins.enrich.enrich_signals import EnrichSignals, EnrichProperties
 from nio.signal.base import Signal
 from nio.util.discovery import discoverable
-from nio.properties import VersionProperty, IntProperty
+from nio.properties import VersionProperty, IntProperty, ObjectProperty
 
 
 class SPIDevice():
@@ -48,10 +49,15 @@ class SPIDevice():
 
 
 @discoverable
-class MCP300x(Block):
+class MCP300x(EnrichSignals, Block):
 
     version = VersionProperty('0.1.0')
     channel = IntProperty(default=0)
+
+    # TODO: remove this when mixin in framework is fixed
+    enrich = ObjectProperty(EnrichProperties,
+                            title='Signal Enrichment',
+                            default=EnrichProperties())
 
     def __init__(self):
         super().__init__()
@@ -68,11 +74,9 @@ class MCP300x(Block):
     def process_signals(self, signals):
         output_signals = []
         for signal in signals:
-            digital_output_code = self._read_from_channel(self.channel(signal))
-            reference_voltage_input = 5.0
-            analog_input_voltage = \
-                digital_output_code * reference_voltage_input / 1024
-            output_signals.append(Signal({"value": analog_input_voltage}))
+            analog_input_voltage = self._read_from_channel(self.channel(signal))
+            output_signals.append(self.get_output_signal(
+                {"volts": analog_input_voltage}, signal))
         self.notify_signals(output_signals)
 
     def _read_from_channel(self, channel):
@@ -88,4 +92,7 @@ class MCP300x(Block):
         received_data = self._spi.writeread(bytes_to_send)
         # Merge bits 8 and 9 from the second received byte with 7 through 0
         # from the third received byte to create the 10-bit digital value.
-        return ((received_data[1] & 3) << 8) + received_data[2]
+        digital_output_code = ((received_data[1] & 3) << 8) + received_data[2]
+        # Scale digital reading to voltage.
+        reference_voltage_input = 5.0
+        return digital_output_code * reference_voltage_input / 1024
