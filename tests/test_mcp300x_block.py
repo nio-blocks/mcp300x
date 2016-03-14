@@ -20,19 +20,19 @@ class TestMCP300xBlock(NIOBlockTestCase):
         mock_spi.assert_called_once_with(blk.logger, 0, 0)
 
     @patch(SPIDevice.__module__ + ".SPIDevice", spec=SPIDevice)
-    def test_read(self, mock_spi):
-        """Each signal triggers an spi read."""
+    def test_read_from_channel(self, mock_spi):
+        """Each signal triggers an spi writeread."""
         blk = MCP300x()
         self.configure_block(blk, {})
-        blk._spi.read.return_value = 3.14
+        blk._spi.writeread.return_value = [1, 2, 3]
         blk.start()
         blk.process_signals([Signal()])
         blk.stop()
-        blk._spi.read.assert_called_once_with(0)
+        blk._spi.writeread.assert_called_once_with([1, 8 << 4, 0])
         self.assert_num_signals_notified(1)
         self.assertDictEqual(
             self.last_notified[DEFAULT_TERMINAL][0].to_dict(), {
-                "value": 3.14
+                "value": (((2 & 3) << 8) + 3) * 5.0 / 1024
             })
 
     @patch(SPIDevice.__module__ + ".SPIDevice", spec=SPIDevice)
@@ -45,7 +45,7 @@ class TestMCP300xBlock(NIOBlockTestCase):
         blk.start()
         blk.process_signals([Signal({"channel": 1})])
         blk.stop()
-        blk._spi.read.assert_called_once_with(1)
+        blk._spi.writeread.assert_called_once_with([1, (8 + 1) << 4, 0])
         self.assert_num_signals_notified(1)
 
     @skip("Only run on a raspbeery pi")
@@ -58,9 +58,8 @@ class TestMCP300xBlock(NIOBlockTestCase):
         blk.start()
         blk.process_signals([Signal()])
         blk.stop()
-        blk._spi._spi.xfer2.assert_called_once_with([1, 128, 0])
+        blk._spi._spi.xfer2.assert_called_once_with([1, 8 << 4, 0])
         self.assert_num_signals_notified(1)
-        self.assertDictEqual(
-            self.last_notified[DEFAULT_TERMINAL][0].to_dict(), {
-                "value": 563
-            })
+        # Value should be voltage between 0 and 5
+        self.assertTrue(
+            0 <= self.last_notified[DEFAULT_TERMINAL][0].value <= 5)

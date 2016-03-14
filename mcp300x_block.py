@@ -23,12 +23,22 @@ class SPIDevice():
         self._spi.open(bus, device)
         self._spi_lock = Lock()
 
-    def read(self, channel):
-        """Read value at channel"""
+    def writeread(self, data):
+        """Write data to spi bus and concurrently read from it
+
+        Args:
+            data (list of bytes): the data two write to the bus
+
+        Return:
+            list: the data read from the bus
+
+        """
         with self._spi_lock:
-            r = self._spi.xfer2([1, (8 + channel) << 4, 0])
-            self.logger.debug("Read from channel {}: {}".format(channel, r))
-        return ((r[1] & 3) << 8) + r[2]
+            bytes_read = self._spi.xfer2(data)
+            self.logger.debug(
+                "Read bytes from SPI bus/device ({}, {}): {}".format(
+                    self._bus, self._device, bytes_read))
+        return bytes_read
 
     def close(self):
         try:
@@ -58,7 +68,24 @@ class MCP300x(Block):
     def process_signals(self, signals):
         output_signals = []
         for signal in signals:
-            value = self._spi.read(self.channel(signal))
-            value = value * 5.0 / 1024
-            output_signals.append(Signal({"value": value}))
+            digital_output_code = self._read_from_channel(self.channel(signal))
+            reference_voltage_input = 5.0
+            analog_input_voltage = \
+                digital_output_code * reference_voltage_input / 1024
+            output_signals.append(Signal({"value": analog_input_voltage}))
         self.notify_signals(output_signals)
+
+    def _read_from_channel(self, channel):
+        bytes_to_send = []
+        # start bit
+        bytes_to_send.append(1)
+        # channel number in most significant nibble
+        # Note: the 8 sets the mode to "single" instead of "differential" 
+        bytes_to_send.append((8 + channel) << 4)
+        # "don't care" byte (need to write 3 bytes to read 3 bytes)
+        bytes_to_send.append(0)
+        # Write and read fro SPI device
+        received_data = self._spi.writeread(bytes_to_send)
+        # Merge bits 8 and 9 from the second received byte with 7 through 0
+        # from the third received byte to create the 10-bit digital value.
+        return ((received_data[1] & 3) << 8) + received_data[2]
