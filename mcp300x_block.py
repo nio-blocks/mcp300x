@@ -4,7 +4,7 @@ from nio.block.mixins.enrich.enrich_signals import EnrichSignals
 from nio.properties import VersionProperty, IntProperty
 
 
-class SPIDevice():
+class SPIDevice:
 
     """Communicate with a peripheral device over SPI.
 
