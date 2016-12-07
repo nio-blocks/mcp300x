@@ -1,12 +1,10 @@
 from threading import Lock
 from nio.block.base import Block
-from nio.block.mixins.enrich.enrich_signals import EnrichSignals, EnrichProperties
-from nio.signal.base import Signal
-from nio.util.discovery import discoverable
-from nio.properties import VersionProperty, IntProperty, ObjectProperty
+from nio.block.mixins.enrich.enrich_signals import EnrichSignals
+from nio.properties import VersionProperty, IntProperty
 
 
-class SPIDevice():
+class SPIDevice:
 
     """Communicate with a peripheral device over SPI.
 
@@ -48,16 +46,10 @@ class SPIDevice():
             self.logger.warning("Failed to close SPI", exc_info=True)
 
 
-@discoverable
 class MCP300x(EnrichSignals, Block):
 
     version = VersionProperty('0.1.0')
     channel = IntProperty(default=0, title="Channel Number")
-
-    # TODO: remove this when mixin in framework is fixed
-    enrich = ObjectProperty(EnrichProperties,
-                            title='Signal Enrichment',
-                            default=EnrichProperties())
 
     def __init__(self):
         super().__init__()

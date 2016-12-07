@@ -5,11 +5,12 @@ Read from the Microchip MCP300X family of 10-bit analog-to-digital converters.
 
 Properties
 ----------
-None
+channel - channel to read from
+enrich - add information to incoming signals
 
 Dependencies
 ------------
-None
+spidev
 
 Commands
 --------
