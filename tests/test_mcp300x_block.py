@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 from nio.block.terminals import DEFAULT_TERMINAL
 from nio.signal.base import Signal
 from nio.testing.block_test_case import NIOBlockTestCase
-from ..mcp300x_block import MCP300x, SPIDevice
+from ..mcp300x_block import MCP300x, SPIDevice, SpiModes
 
 
 class TestMCP300xBlock(NIOBlockTestCase):
@@ -17,7 +17,8 @@ class TestMCP300xBlock(NIOBlockTestCase):
         self.assertTrue(blk._spi)
         self.assertTrue(isinstance(blk._spi, SPIDevice))
         # SPIDevice is initialized with default bus and device
-        mock_spi.assert_called_once_with(blk.logger, 0, 0)
+        mock_spi.assert_called_once_with(
+                                  blk.logger, 0, 0, 500000, SpiModes.mode_0)
 
     @patch(SPIDevice.__module__ + ".SPIDevice", spec=SPIDevice)
     def test_read_from_channel(self, mock_spi):

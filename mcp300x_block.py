@@ -1,7 +1,8 @@
+from enum import Enum
 from threading import Lock
 from nio.block.base import Block
 from nio.block.mixins.enrich.enrich_signals import EnrichSignals
-from nio.properties import VersionProperty, IntProperty
+from nio.properties import VersionProperty, IntProperty, SelectProperty
 
 
 class SPIDevice:
@@ -13,13 +14,15 @@ class SPIDevice:
     devices.
 
     """
-    def __init__(self, logger, bus=0, device=0):
+    def __init__(self, logger, bus=0, device=0, speed_hz=500000, spi_mode=0):
         import spidev
         self.logger = logger
         self._bus = bus
         self._device = device
         self._spi = spidev.SpiDev()
         self._spi.open(bus, device)
+        self._spi.max_speed_hz = speed_hz
+        self._spi.spi_mode = spi_mode
         self._spi_lock = Lock()
 
     def writeread(self, data):
@@ -45,11 +48,16 @@ class SPIDevice:
         except:
             self.logger.warning("Failed to close SPI", exc_info=True)
 
+class SpiModes(Enum):
+    mode_0 = 0b00
+    mode_3 = 0b11
 
 class MCP300x(EnrichSignals, Block):
 
     version = VersionProperty('0.1.0')
     channel = IntProperty(default=0, title="Channel Number")
+    speed = IntProperty(default=500000, title="Clock Rate (Hz)")
+    mode = SelectProperty(SpiModes, title="SPI Mode", default=SpiModes.mode_0)
 
     def __init__(self):
         super().__init__()
@@ -57,7 +65,7 @@ class MCP300x(EnrichSignals, Block):
 
     def configure(self, context):
         super().configure(context)
-        self._spi = SPIDevice(self.logger, 0, 0)
+        self._spi = SPIDevice(self.logger, 0, 0, self.speed(), self.mode())
 
     def stop(self):
         super().stop()
