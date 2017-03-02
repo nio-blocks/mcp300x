@@ -4,6 +4,10 @@ from nio.block.base import Block
 from nio.block.mixins.enrich.enrich_signals import EnrichSignals
 from nio.properties import VersionProperty, IntProperty, SelectProperty
 
+class SpiModes(Enum):
+    mode_0 = 0b00
+    mode_3 = 0b11
+
 
 class SPIDevice:
 
@@ -14,7 +18,8 @@ class SPIDevice:
     devices.
 
     """
-    def __init__(self, logger, bus=0, device=0, speed_hz=500000, spi_mode=0):
+    def __init__(self, logger, bus=0, device=0,
+                               speed_hz=500000, spi_mode=SpiModes.mode_0):
         import spidev
         self.logger = logger
         self._bus = bus
@@ -47,10 +52,6 @@ class SPIDevice:
             self._spi.close()
         except:
             self.logger.warning("Failed to close SPI", exc_info=True)
-
-class SpiModes(Enum):
-    mode_0 = 0b00
-    mode_3 = 0b11
 
 class MCP300x(EnrichSignals, Block):
 
