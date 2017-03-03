@@ -2,7 +2,12 @@ from enum import Enum
 from threading import Lock
 from nio.block.base import Block
 from nio.block.mixins.enrich.enrich_signals import EnrichSignals
-from nio.properties import VersionProperty, IntProperty, SelectProperty
+from nio.properties import (
+    VersionProperty,
+    FloatProperty,
+    IntProperty,
+    SelectProperty
+)
 
 class SpiModes(Enum):
     mode_0 = 0b00
@@ -27,7 +32,7 @@ class SPIDevice:
         self._spi = spidev.SpiDev()
         self._spi.open(bus, device)
         self._spi.max_speed_hz = speed_hz
-        self._spi.spi_mode = spi_mode
+        self._spi.mode = spi_mode
         self._spi_lock = Lock()
 
     def writeread(self, data):
@@ -58,6 +63,7 @@ class MCP300x(EnrichSignals, Block):
     version = VersionProperty('0.1.0')
     channel = IntProperty(default=0, title="Channel Number")
     speed = IntProperty(default=500000, title="Clock Rate (Hz)")
+    vref = FloatProperty(default=5.0, title="Reference Voltage")
     mode = SelectProperty(SpiModes, title="SPI Mode", default=SpiModes.mode_0)
 
     def __init__(self):
@@ -95,5 +101,4 @@ class MCP300x(EnrichSignals, Block):
         # from the third received byte to create the 10-bit digital value.
         digital_output_code = ((received_data[1] & 3) << 8) + received_data[2]
         # Scale digital reading to voltage.
-        reference_voltage_input = 5.0
-        return digital_output_code * reference_voltage_input / 1024
+        return digital_output_code * self.vref() / 1024
