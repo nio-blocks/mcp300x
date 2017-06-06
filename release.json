@@ -1,0 +1,7 @@
+{
+  "nio/MCP300x": {
+    "Version": "1.0.0",
+    "Language": "Python",
+    "Reference": "github.com/nio-blocks/mcp300x.git@v1.0.0"
+  }
+}
