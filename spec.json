@@ -1,21 +1,22 @@
 {
-  "nio/MCP300x": {
-    "Dependencies": [
-      "spidev"
-    ],
-    "Input": "Any list of signals.",
-    "Version": "1.0.0",
-    "Output": "Adds \"volts\" to each signal.\n```\n{\"volts\": 3.14}\n```",
-    "Category": "Hardware",
-    "Properties": {
-      "channel": {
-        "description": "channel to read from"
-      },
-      "enrich": {
-        "description": "add information to incoming signals"
-      }
-    },
-    "Description": "Read from the Microchip MCP300X family of 10-bit analog-to-digital converters.",
-    "Commands": {}
-  }
+    "nio/MCP300x": {
+        "Category": "Hardware",
+        "Properties": {
+            "enrich": {
+                "description": "add information to incoming signals"
+            },
+            "channel": {
+                "description": "channel to read from"
+            }
+        },
+        "Output": {
+            "Description": "Adds \"volts\" to each signal.\n```\n{\"volts\": 3.14}\n```"
+        },
+        "Input": {
+            "Description": "Any list of signals."
+        },
+        "Description": "Read from the Microchip MCP300X family of 10-bit analog-to-digital converters.",
+        "Version": "1.0.0",
+        "Commands": {}
+    }
 }
