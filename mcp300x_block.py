@@ -62,6 +62,7 @@ class MCP300x(EnrichSignals, Block):
 
     version = VersionProperty('0.1.0')
     channel = IntProperty(default=0, title="Channel Number")
+    total_channels = IntProperty(default=8, title="Total Channels")
     speed = IntProperty(default=500000, title="Clock Rate (Hz)")
     vref = FloatProperty(default=5.0, title="Reference Voltage")
     mode = SelectProperty(SpiModes, title="SPI Mode", default=SpiModes.mode_0)
@@ -91,8 +92,11 @@ class MCP300x(EnrichSignals, Block):
         # start bit
         bytes_to_send.append(1)
         # channel number in most significant nibble
-        # Note: the 8 sets the mode to "single" instead of "differential"
-        bytes_to_send.append((8 + channel) << 4)
+        if(self.total_channels() == 2):
+            bytes_to_send.append((2 + channel) << 6)
+        else:
+            # Note: the 8 sets the mode to "single" instead of "differential"
+            bytes_to_send.append((8 + channel) << 4)
         # "don't care" byte (need to write 3 bytes to read 3 bytes)
         bytes_to_send.append(0)
         # Write and read fro SPI device
