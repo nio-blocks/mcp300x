@@ -99,7 +99,7 @@ class MCP300x(EnrichSignals, Block):
             bytes_to_send.append((8 + channel) << 4)
         # "don't care" byte (need to write 3 bytes to read 3 bytes)
         bytes_to_send.append(0)
-        # Write and read fro SPI device
+        # Write and read from SPI device
         received_data = self._spi.writeread(bytes_to_send)
         # Merge bits 8 and 9 from the second received byte with 7 through 0
         # from the third received byte to create the 10-bit digital value.
