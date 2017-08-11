@@ -92,11 +92,11 @@ class MCP300x(EnrichSignals, Block):
         # start bit
         bytes_to_send.append(1)
         # channel number in most significant nibble
-        if(self.total_channels() == 2):
-            bytes_to_send.append((2 + channel) << 6)
+        if self.total_channels() % 4 == 0:
+            bytes_to_send.append((8 + channel) << 4)
         else:
             # Note: the 8 sets the mode to "single" instead of "differential"
-            bytes_to_send.append((8 + channel) << 4)
+            bytes_to_send.append((2 + channel) << 6)
         # "don't care" byte (need to write 3 bytes to read 3 bytes)
         bytes_to_send.append(0)
         # Write and read from SPI device
