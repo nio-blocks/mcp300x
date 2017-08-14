@@ -1,13 +1,11 @@
 from enum import Enum
 from threading import Lock
+
 from nio.block.base import Block
 from nio.block.mixins.enrich.enrich_signals import EnrichSignals
-from nio.properties import (
-    VersionProperty,
-    FloatProperty,
-    IntProperty,
-    SelectProperty
-)
+from nio.properties import (VersionProperty, FloatProperty, IntProperty,
+                            SelectProperty)
+
 
 class SpiModes(Enum):
     mode_0 = 0b00
@@ -23,8 +21,8 @@ class SPIDevice:
     devices.
 
     """
-    def __init__(self, logger, bus=0, device=0,
-                               speed_hz=500000, spi_mode=SpiModes.mode_0):
+    def __init__(self, logger, bus=0, device=0, speed_hz=500000,
+                 spi_mode=SpiModes.mode_0):
         import spidev
         self.logger = logger
         self._bus = bus
@@ -58,6 +56,7 @@ class SPIDevice:
         except:
             self.logger.warning("Failed to close SPI", exc_info=True)
 
+
 class MCP300x(EnrichSignals, Block):
 
     version = VersionProperty('0.1.0')
@@ -81,7 +80,8 @@ class MCP300x(EnrichSignals, Block):
     def process_signals(self, signals):
         output_signals = []
         for signal in signals:
-            analog_input_voltage = self._read_from_channel(self.channel(signal))
+            analog_input_voltage = self._read_from_channel(
+                self.channel(signal))
             output_signals.append(self.get_output_signal(
                 {"volts": analog_input_voltage}, signal))
         self.notify_signals(output_signals)

@@ -1,10 +1,52 @@
 {
   "nio/MCP300x": {
-    "version": "0.0.1",
-    "description": "",
-    "inputs": {},
-    "outputs": {},
-    "properties": {},
+    "version": "0.1.0",
+    "description": "Read from the Microchip MCP300X family of 10-bit analog-to-digital converters.",
+    "properties": {
+      "channel": {
+        "title": "Channel Number",
+        "type": "IntType",
+        "description": "Microchip channel to read from",
+        "default": 0
+      },
+      "enrich": {
+        "title": "Signal Enrichment",
+        "type": "ObjectType",
+        "description": "If true, include the original incoming signal in the output signal.",
+        "default": {
+          "exclude_existing": true,
+          "enrich_field": ""
+        }
+      },
+      "mode": {
+        "title": "SPI Mode",
+        "type": "SelectType",
+        "description": "Mode used by device to read data.",
+        "default": 0
+      },
+      "speed": {
+        "title": "Clock Rate (Hz)",
+        "type": "IntType",
+        "description": "SPI protocol max speed.",
+        "default": 500000
+      },
+      "vref": {
+        "title": "Reference Voltage",
+        "type": "FloatType",
+        "description": "Reference value for scaling digital reading to voltage.",
+        "default": 5.0
+      }
+    },
+    "inputs": {
+      "default": {
+        "description": "Any list of signals."
+      }
+    },
+    "outputs": {
+      "default": {
+        "description": "Signal with a 'volts' attribute read from the microchip."
+      }
+    },
     "commands": {}
   }
 }
