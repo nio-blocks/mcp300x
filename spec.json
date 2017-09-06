@@ -2,6 +2,9 @@
   "nio/MCP300x": {
     "version": "0.1.0",
     "description": "Read from the Microchip MCP300X family of 10-bit analog-to-digital converters.",
+    "categories": [
+      "Hardware"
+    ],
     "properties": {
       "channel": {
         "title": "Channel Number",
