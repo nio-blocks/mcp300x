@@ -11,6 +11,10 @@ class SpiModes(Enum):
     mode_0 = 0b00
     mode_3 = 0b11
 
+class NumChannels(Enum):
+    TWO = 1
+    FOUR = 2
+    EIGHT = 3
 
 class SPIDevice:
 
@@ -61,7 +65,7 @@ class MCP300x(EnrichSignals, Block):
 
     version = VersionProperty('0.1.0')
     channel = IntProperty(default=0, title="Channel Number")
-    total_channels = IntProperty(default=8, title="Total Channels")
+    total_channels = SelectProperty(NumChannels, default=NumChannels.EIGHT, title="Total Channels")
     speed = IntProperty(default=500000, title="Clock Rate (Hz)")
     vref = FloatProperty(default=5.0, title="Reference Voltage")
     mode = SelectProperty(SpiModes, title="SPI Mode", default=SpiModes.mode_0)
@@ -92,7 +96,8 @@ class MCP300x(EnrichSignals, Block):
         # start bit
         bytes_to_send.append(1)
         # channel number in most significant nibble
-        if self.total_channels() % 4 == 0:
+        if self.total_channels() == NumChannels.FOUR \
+            or self.total_channels() == NumChannels.EIGHT:
             bytes_to_send.append((8 + channel) << 4)
         else:
             bytes_to_send.append((2 + channel) << 6)
