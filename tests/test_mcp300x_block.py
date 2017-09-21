@@ -70,7 +70,7 @@ class TestMCP300xBlock(NIOBlockTestCase):
         blk._spi.writeread.assert_called_once_with([1, (8 + 1) << 4, 0])
         self.assert_num_signals_notified(1)
 
-    @skip("Only run on a raspbeery pi")
+    @skip("Only run on a raspberry pi")
     def test_raspberry_pi(self):
         """Raspberry pi uses spidev library's xfer2 function."""
         blk = MCP300x()
