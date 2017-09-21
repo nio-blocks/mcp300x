@@ -11,10 +11,10 @@ class SpiModes(Enum):
     mode_0 = 0b00
     mode_3 = 0b11
 
-class NumChannels(Enum):
-    TWO = 1
-    FOUR = 2
-    EIGHT = 3
+class Model(Enum):
+    MCP3002 = 0
+    MCP3004 = 1
+    MCP3008 = 2
 
 class SPIDevice:
 
@@ -65,7 +65,7 @@ class MCP300x(EnrichSignals, Block):
 
     version = VersionProperty('0.1.0')
     channel = IntProperty(default=0, title="Channel Number")
-    total_channels = SelectProperty(NumChannels, default=NumChannels.EIGHT, title="Total Channels")
+    chip_model = SelectProperty(Model, default=Model.MCP3008, title="Chip Model")
     speed = IntProperty(default=500000, title="Clock Rate (Hz)")
     vref = FloatProperty(default=5.0, title="Reference Voltage")
     mode = SelectProperty(SpiModes, title="SPI Mode", default=SpiModes.mode_0)
@@ -96,11 +96,10 @@ class MCP300x(EnrichSignals, Block):
         # start bit
         bytes_to_send.append(1)
         # channel number in most significant nibble
-        if self.total_channels() == NumChannels.FOUR \
-            or self.total_channels() == NumChannels.EIGHT:
-            bytes_to_send.append((8 + channel) << 4)
-        else:
+        if self.chip_model().value == 0:
             bytes_to_send.append((2 + channel) << 6)
+        else:
+            bytes_to_send.append((8 + channel) << 4)
         # "don't care" byte (need to write 3 bytes to read 3 bytes)
         bytes_to_send.append(0)
         # Write and read from SPI device
