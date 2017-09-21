@@ -72,7 +72,7 @@ class TestMCP300xBlock(NIOBlockTestCase):
 
     @patch(SPIDevice.__module__ + ".SPIDevice", spec=SPIDevice)
     def test_chip_model_property(self, mock_spi):
-        """Each signal triggers an spi read."""
+        """Signal triggers correct bitshift in writeread for block config."""
         blk = MCP300x()
         self.configure_block(blk, {
             "chip_model": "MCP3002",
