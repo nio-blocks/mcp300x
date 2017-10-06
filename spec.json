@@ -9,13 +9,13 @@
       "channel": {
         "title": "Channel Number",
         "type": "IntType",
-        "description": "Microchip channel to read from",
+        "description": "Microchip channel to read from.",
         "default": 0
       },
       "enrich": {
         "title": "Signal Enrichment",
         "type": "ObjectType",
-        "description": "If true, include the original incoming signal in the output signal.",
+        "description": "If `true`, include the original incoming signal in the output signal.",
         "default": {
           "exclude_existing": true,
           "enrich_field": ""
@@ -30,7 +30,7 @@
       "speed": {
         "title": "Clock Rate (Hz)",
         "type": "IntType",
-        "description": "SPI protocol max speed.",
+        "description": "SPI protocol maximum speed.",
         "default": 500000
       },
       "vref": {
