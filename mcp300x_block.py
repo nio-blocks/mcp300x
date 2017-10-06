@@ -11,6 +11,10 @@ class SpiModes(Enum):
     mode_0 = 0b00
     mode_3 = 0b11
 
+class Model(Enum):
+    MCP3002 = 0
+    MCP3004 = 1
+    MCP3008 = 2
 
 class SPIDevice:
 
@@ -61,6 +65,7 @@ class MCP300x(EnrichSignals, Block):
 
     version = VersionProperty('0.1.0')
     channel = IntProperty(default=0, title="Channel Number")
+    chip_model = SelectProperty(Model, default=Model.MCP3008, title="Chip Model")
     speed = IntProperty(default=500000, title="Clock Rate (Hz)")
     vref = FloatProperty(default=5.0, title="Reference Voltage")
     mode = SelectProperty(SpiModes, title="SPI Mode", default=SpiModes.mode_0)
@@ -91,11 +96,13 @@ class MCP300x(EnrichSignals, Block):
         # start bit
         bytes_to_send.append(1)
         # channel number in most significant nibble
-        # Note: the 8 sets the mode to "single" instead of "differential"
-        bytes_to_send.append((8 + channel) << 4)
+        if self.chip_model().value == 0:
+            bytes_to_send.append((2 + channel) << 6)
+        else:
+            bytes_to_send.append((8 + channel) << 4)
         # "don't care" byte (need to write 3 bytes to read 3 bytes)
         bytes_to_send.append(0)
-        # Write and read fro SPI device
+        # Write and read from SPI device
         received_data = self._spi.writeread(bytes_to_send)
         # Merge bits 8 and 9 from the second received byte with 7 through 0
         # from the third received byte to create the 10-bit digital value.

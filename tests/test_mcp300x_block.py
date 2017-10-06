@@ -70,6 +70,20 @@ class TestMCP300xBlock(NIOBlockTestCase):
         blk._spi.writeread.assert_called_once_with([1, (8 + 1) << 4, 0])
         self.assert_num_signals_notified(1)
 
+    @patch(SPIDevice.__module__ + ".SPIDevice", spec=SPIDevice)
+    def test_chip_model_property(self, mock_spi):
+        """Signal triggers correct bitshift in writeread for block config."""
+        blk = MCP300x()
+        self.configure_block(blk, {
+            "chip_model": "MCP3002",
+            "channel": "{{ $channel }}"
+        })
+        blk.start()
+        blk.process_signals([Signal({"channel": 2})])
+        blk.stop()
+        blk._spi.writeread.assert_called_once_with([1, (2 + 2) << 6, 0])
+        self.assert_num_signals_notified(1)
+
     @skip("Only run on a raspberry pi")
     def test_raspberry_pi(self):
         """Raspberry pi uses spidev library's xfer2 function."""

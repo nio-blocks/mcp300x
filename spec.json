@@ -12,6 +12,12 @@
         "description": "Microchip channel to read from.",
         "default": 0
       },
+      "chip_model": {
+        "title": "Chip Model",
+        "type": "SelectType",
+        "description": "Chip model corresponding to total number of channels on chip",
+        "default": 2
+      },
       "enrich": {
         "title": "Signal Enrichment",
         "type": "ObjectType",
