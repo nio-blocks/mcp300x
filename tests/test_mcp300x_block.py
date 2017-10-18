@@ -19,7 +19,7 @@ class TestMCP300xBlock(NIOBlockTestCase):
         self.assertTrue(isinstance(blk._spi, SPIDevice))
         # SPIDevice is initialized with default bus and device
         mock_spi.assert_called_once_with(
-                                  blk.logger, 0, 0, 500000, SpiModes.mode_0)
+                                  blk.logger, 0, 0, 500000, 0)
 
     @patch(SPIDevice.__module__ + ".SPIDevice", spec=SPIDevice)
     def test_read_from_channel(self, mock_spi):
