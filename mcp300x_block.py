@@ -26,7 +26,7 @@ class SPIDevice:
 
     """
     def __init__(self, logger, bus=0, device=0, speed_hz=500000,
-                 spi_mode=SpiModes.mode_0):
+                 spi_mode=SpiModes.mode_0.value):
         import spidev
         self.logger = logger
         self._bus = bus
@@ -76,7 +76,7 @@ class MCP300x(EnrichSignals, Block):
 
     def configure(self, context):
         super().configure(context)
-        self._spi = SPIDevice(self.logger, 0, 0, self.speed(), self.mode())
+        self._spi = SPIDevice(self.logger, 0, 0, self.speed(), self.mode().value)
 
     def stop(self):
         super().stop()
