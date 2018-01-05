@@ -4,7 +4,7 @@ Read from the Microchip MCP300X family of 10-bit analog-to-digital converters.
 
 Properties
 ----------
-- **channel**: Microchip channel to read from
+- **channel**: Microchip channel to read.
 - **chip_model**: Chip model corresponding to total number of channels on chip.
 - **enrich**: If true, include the original incoming signal in the output signal.
 - **mode**: Mode used by device to read data.
@@ -24,6 +24,7 @@ Outputs
 
 Commands
 --------
+None
 
 Dependencies
 ------------
