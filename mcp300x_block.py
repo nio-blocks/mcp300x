@@ -63,7 +63,7 @@ class SPIDevice:
 
 class MCP300x(EnrichSignals, Block):
 
-    version = VersionProperty('0.1.0')
+    version = VersionProperty("0.2.0")
     channel = IntProperty(default=0, title="Channel Number")
     chip_model = SelectProperty(Model, default=Model.MCP3008, title="Chip Model")
     speed = IntProperty(default=500000, title="Clock Rate (Hz)")

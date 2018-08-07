@@ -1,6 +1,6 @@
 {
   "nio/MCP300x": {
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Read from the Microchip MCP300X family of 10-bit analog-to-digital converters.",
     "categories": [
       "Hardware"
@@ -43,7 +43,7 @@
         "title": "Reference Voltage",
         "type": "FloatType",
         "description": "Reference value for scaling digital reading to voltage.",
-        "default": 5.0
+        "default": 5
       }
     },
     "inputs": {
